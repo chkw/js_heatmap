@@ -106,30 +106,32 @@ function setHeatmapData(url) {
             value : "" + d.value
         };
     }, function(error, data) {
-        var dataObj = new heatmapData(data);
+        var settings = {
+            "rowFeature" : "day",
+            "columnFeature" : "hour",
+            "valueFeature" : "value",
+            "nameFeature" : "value"
+        };
+
+        var dataObj = new heatmapData(data, settings);
 
         var colNames = dataObj.getColumnNames();
-        console.log("colNames->" + JSON.stringify(colNames));
 
         var colNameMapping = new Object();
         for (var i in colNames) {
             var name = colNames[i] + "QQ";
             colNameMapping[name] = i;
         }
-        console.log("colNameMapping->" + JSON.stringify(colNameMapping));
 
         var rowNames = dataObj.getRowNames();
-        console.log("rowNames->" + JSON.stringify(rowNames));
 
         var rowNameMapping = new Object();
         for (var i in rowNames) {
             var name = rowNames[i] + "QQ";
             rowNameMapping[name] = i;
         }
-        console.log("rowNameMapping->" + JSON.stringify(rowNameMapping));
 
         var valNames = dataObj.getAllValues();
-        console.log("valNames->" + JSON.stringify(valNames));
 
         // color scale
         var colors = ["#ffffd9", "#edf8b1", "#c7e9b4", "#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#253494", "#081d58"];
@@ -137,7 +139,7 @@ function setHeatmapData(url) {
         var colorScale = d3.scale.quantile().domain([0, buckets - 1, d3.max(dataObj.getAllValues(), function(d) {
             return parseFloat(d);
         })]).range(colors);
-        console.log(colors);
+        console.log("colors->" + colors);
 
         var margin = {
             top : 50,
