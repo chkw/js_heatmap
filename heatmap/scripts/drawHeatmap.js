@@ -146,9 +146,9 @@ function setHeatmapData(url) {
             left : 30
         };
         // document.documentElement.clientWidth
-        var fullWidth = 960;
+        var fullWidth = 480;
         // document.documentElement.clientHeight
-        var fullHeight = 430;
+        var fullHeight = 400;
         var width = fullWidth - margin.left - margin.right;
         var height = fullHeight - margin.top - margin.bottom;
         var gridSize = Math.floor(width / colNames.length);
@@ -184,6 +184,11 @@ function setHeatmapData(url) {
         }).attr("y", function(d) {
             return (rowNameMapping[d.getRow() + "QQ"]) * gridSize;
         }).attr("rx", 4).attr("ry", 4).attr("class", "hour bordered").attr("width", gridSize).attr("height", gridSize).style("fill", colors[0]);
+
+        // TODO heatmap click event
+        heatMap.on("click", function(d, i) {
+            console.log("clicked cell: r" + d.getRow() + " c" + d.getColumn());
+        });
 
         // heatmap transition/animation
         heatMap.transition().duration(1000).style("fill", function(d) {
