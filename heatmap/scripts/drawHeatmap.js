@@ -28,8 +28,6 @@ function setHeatmapData(url) {
 
         var dataObj = new heatmapData(data, settings);
 
-        var a = dataObj.getColorMapper();
-
         var colNames = dataObj.getColumnNames();
 
         var colNameMapping = new Object();
@@ -105,7 +103,7 @@ function setHeatmapData(url) {
 
         // TODO heatmap click event
         heatMap.on("click", function(d, i) {
-            console.log("clicked cell: r" + d.getRow() + " c" + d.getColumn());
+            console.log("clicked cell: r" + d.getRow() + " c" + d.getColumn() + " name" + d.getName() + " val" + d.getValue());
         });
 
         // heatmap transition/animation
