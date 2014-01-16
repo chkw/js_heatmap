@@ -62,7 +62,7 @@ function setHeatmapData(url) {
             left : 30
         };
         // document.documentElement.clientWidth
-        var fullWidth = document.documentElement.clientWidth;
+        var fullWidth = 400;
         // document.documentElement.clientHeight
         var fullHeight = document.documentElement.clientHeight;
         var width = fullWidth - margin.left - margin.right;
@@ -71,35 +71,58 @@ function setHeatmapData(url) {
         var legendElementWidth = gridSize * 2;
 
         // SVG canvas
-        var svg = d3.select("#chart").append("svg").attr("width", fullWidth).attr("height", fullHeight).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        var svg = d3.select("#chart").append("svg").attr({
+            "width" : fullWidth,
+            "height" : fullHeight
+        }).append("g").attr({
+            "transform" : "translate(" + margin.left + "," + margin.top + ")"
+        });
 
         // row labels
         var rowLabels = svg.selectAll(".rowLabel").data(rowNames).enter().append("text").text(function(d) {
             return d;
-        }).attr("x", 0).attr("y", function(d, i) {
-            return i * gridSize;
-        }).style("text-anchor", "end").attr("transform", "translate(-6," + gridSize / 1.5 + ")").attr("class", function(d, i) {
-            return "rowLabel mono axis axis-row";
-        });
+        }).attr({
+            "x" : 0,
+            "y" : function(d, i) {
+                return i * gridSize;
+            },
+            "transform" : "translate(-6," + gridSize / 1.5 + ")",
+            "class" : function(d, i) {
+                return "rowLabel mono axis axis-row";
+            }
+        }).style("text-anchor", "end");
 
         // col labels
         var colLabels = svg.selectAll(".colLabel").data(colNames).enter().append("text").text(function(d) {
             return d;
-        }).attr("x", function(d, i) {
-            return i * gridSize;
-        }).attr("y", 0).style("text-anchor", "middle").attr("transform", "translate(" + gridSize / 2 + ", -6)").attr("class", function(d, i) {
-            return "colLabel mono axis axis-col";
-        });
+        }).attr({
+            "x" : function(d, i) {
+                return i * gridSize;
+            },
+            "y" : 0,
+            "transform" : "translate(" + gridSize / 2 + ", -6)",
+            "class" : function(d, i) {
+                return "colLabel mono axis axis-col";
+            }
+        }).style("text-anchor", "middle");
 
         // heatmap SVG elements
-        var heatMap = svg.selectAll(".hour").data(dataObj.getData()).enter().append("rect").attr("x", function(d) {
-            var colName = d.getColumn();
-            var colNum = colNameMapping[d.getColumn() + "QQ"];
-            var val = colNum * gridSize;
-            return val;
-        }).attr("y", function(d) {
-            return (rowNameMapping[d.getRow() + "QQ"]) * gridSize;
-        }).attr("rx", 4).attr("ry", 4).attr("class", "hour bordered").attr("width", gridSize).attr("height", gridSize).style("fill", colors[0]);
+        var heatMap = svg.selectAll(".hour").data(dataObj.getData()).enter().append("rect").attr({
+            "x" : function(d) {
+                var colName = d.getColumn();
+                var colNum = colNameMapping[d.getColumn() + "QQ"];
+                var val = colNum * gridSize;
+                return val;
+            },
+            "y" : function(d) {
+                return (rowNameMapping[d.getRow() + "QQ"]) * gridSize;
+            },
+            "rx" : 4,
+            "ry" : 4,
+            "class" : "hour bordered",
+            "width" : gridSize,
+            "height" : gridSize
+        }).style("fill", colors[0]);
 
         // TODO heatmap click event
         heatMap.on("click", function(d, i) {
@@ -120,21 +143,30 @@ function setHeatmapData(url) {
         var quantiles = [0].concat(colorScale.quantiles());
         var legend = svg.selectAll(".legend").data(quantiles, function(d) {
             return d;
-        }).enter().append("g").attr("class", "legend");
+        }).enter().append("g").attr({
+            "class" : "legend"
+        });
 
         // legend rectangles
         legend.append("rect").attr("x", function(d, i) {
             return legendElementWidth * i;
-        }).attr("y", height).attr("width", legendElementWidth).attr("height", gridSize / 2).style("fill", function(d, i) {
+        }).attr({
+            "y" : height,
+            "width" : legendElementWidth,
+            "height" : (gridSize / 2)
+        }).style("fill", function(d, i) {
             return colors[i];
         });
 
         // legend text
         legend.append("text").attr("class", "mono").text(function(d) {
             return "≥ " + Math.round(d);
-        }).attr("x", function(d, i) {
-            return legendElementWidth * i;
-        }).attr("y", height + gridSize);
+        }).attr({
+            "x" : function(d, i) {
+                return legendElementWidth * i;
+            },
+            "y" : (height + gridSize)
+        });
     });
 }
 
