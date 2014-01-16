@@ -19,11 +19,31 @@ function cellData(newCellData) {
     };
 }
 
-function heatmapData(deserializedJson) {
-    this.rowFeature = "day";
-    this.columnFeature = "hour";
+function heatmapData(deserializedJson, settings) {
+
+    this.rowFeature = "row";
+    this.columnFeature = "column";
     this.valueFeature = "value";
     this.nameFeature = "value";
+    this.colorMapper = null;
+
+    if (settings != null) {
+        if ("rowFeature" in settings) {
+            this.rowFeature = settings["rowFeature"];
+        }
+        if ("columnFeature" in settings) {
+            this.columnFeature = settings["columnFeature"];
+        }
+        if ("valueFeature" in settings) {
+            this.valueFeature = settings["valueFeature"];
+        }
+        if ("nameFeature" in settings) {
+            this.nameFeature = settings["nameFeature"];
+        }
+        if ("colorMapper" in settings) {
+            this.colorMapper = settings["colorMapper"];
+        }
+    }
 
     this.data = new Array();
     for (var i in deserializedJson) {
@@ -37,6 +57,10 @@ function heatmapData(deserializedJson) {
 
     this.getData = function() {
         return this.data;
+    };
+
+    this.getColorMapper = function() {
+        return this.colorMapper;
     };
 
     this.getColumnNames = function() {
