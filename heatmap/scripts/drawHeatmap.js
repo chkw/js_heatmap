@@ -55,6 +55,8 @@ function setHeatmapData(url) {
             return parseFloat(d);
         })]).range(colors);
 
+        // dataObj.setColorMapper(colorScale);
+
         var margin = {
             top : 50,
             right : 0,
@@ -108,8 +110,7 @@ function setHeatmapData(url) {
 
         // heatmap transition/animation
         heatMap.transition().duration(1000).style("fill", function(d) {
-            return colorScale(d.getValue());
-            // return a(d.getValue());
+            return dataObj.getColorMapper()(d.getValue());
         });
 
         // heatmap titles

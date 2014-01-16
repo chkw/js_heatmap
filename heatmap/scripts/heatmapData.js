@@ -51,7 +51,7 @@ function heatmapData(deserializedJson, settings) {
             "row" : deserializedJson[i][this.rowFeature],
             "column" : deserializedJson[i][this.columnFeature],
             "value" : deserializedJson[i][this.valueFeature],
-            "name" : deserializedJson[i][this.valueFeature]
+            "name" : deserializedJson[i][this.nameFeature]
         }));
     }
 
@@ -61,6 +61,10 @@ function heatmapData(deserializedJson, settings) {
 
     this.getColorMapper = function() {
         return this.colorMapper;
+    };
+
+    this.setColorMapper = function(mapper) {
+        this.colorMapper = mapper;
     };
 
     this.getColumnNames = function() {
