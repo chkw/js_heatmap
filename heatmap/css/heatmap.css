@@ -16,10 +16,10 @@ text.mono {
     fill: #aaa;
 }
 
-text.axis-workweek {
+text.axis-col {
     fill: #000;
 }
 
-text.axis-worktime {
+text.axis-row {
     fill: #000;
 }
