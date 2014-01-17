@@ -62,7 +62,7 @@ function setHeatmapData(url) {
             left : 30
         };
         // document.documentElement.clientWidth
-        var fullWidth = 400;
+        var fullWidth = document.documentElement.clientWidth;
         // document.documentElement.clientHeight
         var fullHeight = document.documentElement.clientHeight;
         var width = fullWidth - margin.left - margin.right;
@@ -96,15 +96,15 @@ function setHeatmapData(url) {
         var colLabels = svg.selectAll(".colLabel").data(colNames).enter().append("text").text(function(d) {
             return d;
         }).attr({
-            "x" : function(d, i) {
-                return i * gridSize;
+            "y" : function(d, i) {
+                return (i + 1) * gridSize;
             },
-            "y" : 0,
-            "transform" : "translate(" + gridSize / 2 + ", -6)",
+            "x" : 0,
+            "transform" : " rotate(-90) translate(" + gridSize / 2 + ", -6)",
             "class" : function(d, i) {
                 return "colLabel mono axis axis-col";
             }
-        }).style("text-anchor", "middle");
+        }).style("text-anchor", "start");
 
         // heatmap SVG elements
         var heatMap = svg.selectAll(".hour").data(dataObj.getData()).enter().append("rect").attr({
