@@ -68,7 +68,6 @@ function setHeatmapData(url) {
             "bottom" : bottom,
             "left" : left
         };
-        console.log("margin->" + JSON.stringify(margin));
 
         // document.documentElement.clientWidth
         var fullWidth = document.documentElement.clientWidth;
