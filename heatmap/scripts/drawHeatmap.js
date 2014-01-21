@@ -100,7 +100,7 @@ function setHeatmapData(url) {
                 return (i + 1) * gridSize;
             },
             "x" : 0,
-            "transform" : " rotate(-90) translate(" + gridSize / 2 + ", -6)",
+            "transform" : "rotate(-90) translate(" + (gridSize / 2) + ", -6)",
             "class" : function(d, i) {
                 return "colLabel mono axis axis-col";
             }
