@@ -24,11 +24,11 @@ function setHeatmapData(url) {
             "valueFeature" : "State",
             "nameFeature" : "State",
             "colorMapper" : function(d) {
-                color = "grey";
+                color = "darkgrey";
                 if (d.toLowerCase() == "error") {
                     color = "red";
                 } else if (d.toLowerCase() == "pending") {
-                    color = "yellow";
+                    color = "goldenrod";
                 } else if (d.toLowerCase() == "ready") {
                     color = "green";
                 }
@@ -38,7 +38,7 @@ function setHeatmapData(url) {
 
         var dataObj = new heatmapData(data, settings);
 
-        var colNames = dataObj.getColumnNames();
+        var colNames = dataObj.getColumnNames().sort();
 
         var colNameMapping = new Object();
         for (var i in colNames) {
@@ -46,7 +46,7 @@ function setHeatmapData(url) {
             colNameMapping[name] = i;
         }
 
-        var rowNames = dataObj.getRowNames();
+        var rowNames = dataObj.getRowNames().sort();
 
         var rowNameMapping = new Object();
         for (var i in rowNames) {
