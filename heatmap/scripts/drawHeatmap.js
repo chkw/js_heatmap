@@ -4,7 +4,7 @@
  * Draw heatmaps via d3.js.
  */
 
-var dataUrl = "heatmap/data/data.tsv";
+var dataUrl = "heatmap/data/workflows.tsv";
 
 /**
  * get the JSON data to create a heatmapData object.
@@ -12,17 +12,17 @@ var dataUrl = "heatmap/data/data.tsv";
 function setHeatmapData(url) {
     d3.tsv(url, function(d) {
         return {
-            day : "" + d.day,
-            hour : "" + d.hour,
-            value : "" + d.value
+            "Group" : "" + d.Group,
+            "Workflow" : "" + d.Workflow,
+            "State" : "" + d.State
         };
     }, function(error, data) {
         var discreteColorMapper = d3.scale.category20();
         var settings = {
-            "rowFeature" : "day",
-            "columnFeature" : "hour",
-            "valueFeature" : "value",
-            "nameFeature" : "value",
+            "rowFeature" : "Workflow",
+            "columnFeature" : "Group",
+            "valueFeature" : "State",
+            "nameFeature" : "State",
             "colorMapper" : discreteColorMapper
         };
 
@@ -44,22 +44,26 @@ function setHeatmapData(url) {
             rowNameMapping[name] = i;
         }
 
-        var valNames = dataObj.getAllValues();
-
         // color scale
-        var colors = ["#ffffd9", "#edf8b1", "#c7e9b4", "#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#253494", "#081d58"];
-        var buckets = colors.length;
-        var colorScale = d3.scale.quantile().domain([0, buckets - 1, d3.max(dataObj.getAllValues(), function(d) {
-            return parseFloat(d);
-        })]).range(colors);
+
+        // var colors = ["#ffffd9", "#edf8b1", "#c7e9b4", "#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#253494", "#081d58"];
+        // var buckets = colors.length;
+        // var colorScale = d3.scale.quantile().domain([0, buckets - 1, d3.max(dataObj.getAllValues(), function(d) {
+        // return parseFloat(d);
+        // })]).range(colors);
 
         // dataObj.setColorMapper(colorScale);
 
+        var top = 9 * lengthOfLongestString(dataObj.getColumnNames());
+        var right = 0;
+        var bottom = 0;
+        var left = 8 * lengthOfLongestString(dataObj.getRowNames());
+
         var margin = {
-            top : 50,
-            right : 0,
-            bottom : 100,
-            left : 30
+            "top" : top,
+            "right" : right,
+            "bottom" : bottom,
+            "left" : left
         };
         // document.documentElement.clientWidth
         var fullWidth = document.documentElement.clientWidth;
@@ -67,7 +71,8 @@ function setHeatmapData(url) {
         var fullHeight = document.documentElement.clientHeight;
         var width = fullWidth - margin.left - margin.right;
         var height = fullHeight - margin.top - margin.bottom;
-        var gridSize = Math.floor(width / colNames.length);
+        var denom = (colNames.length > rowNames.length) ? colNames.length : rowNames.length;
+        var gridSize = Math.floor(width / denom);
         var legendElementWidth = gridSize * 2;
 
         // SVG canvas
@@ -93,6 +98,9 @@ function setHeatmapData(url) {
         }).style("text-anchor", "end");
 
         // col labels
+        var rotationDegrees = -90;
+        var translateX = Math.floor(gridSize / 5);
+        var translateY = -1 * Math.floor(gridSize / 3);
         var colLabels = svg.selectAll(".colLabel").data(colNames).enter().append("text").text(function(d) {
             return d;
         }).attr({
@@ -100,7 +108,7 @@ function setHeatmapData(url) {
                 return (i + 1) * gridSize;
             },
             "x" : 0,
-            "transform" : "rotate(-90) translate(" + (gridSize / 2) + ", -6)",
+            "transform" : "rotate(" + rotationDegrees + ") translate(" + translateX + ", " + translateY + ")",
             "class" : function(d, i) {
                 return "colLabel mono axis axis-col";
             }
@@ -122,7 +130,7 @@ function setHeatmapData(url) {
             "class" : "hour bordered",
             "width" : gridSize,
             "height" : gridSize
-        }).style("fill", colors[0]);
+        }).style("fill", "#ffffd9");
 
         // TODO heatmap click event
         heatMap.on("click", function(d, i) {
@@ -139,34 +147,34 @@ function setHeatmapData(url) {
             return d.getName();
         });
 
-        // legend SVG element
-        var quantiles = [0].concat(colorScale.quantiles());
-        var legend = svg.selectAll(".legend").data(quantiles, function(d) {
-            return d;
-        }).enter().append("g").attr({
-            "class" : "legend"
-        });
-
-        // legend rectangles
-        legend.append("rect").attr("x", function(d, i) {
-            return legendElementWidth * i;
-        }).attr({
-            "y" : height,
-            "width" : legendElementWidth,
-            "height" : (gridSize / 2)
-        }).style("fill", function(d, i) {
-            return colors[i];
-        });
-
-        // legend text
-        legend.append("text").attr("class", "mono").text(function(d) {
-            return "≥ " + Math.round(d);
-        }).attr({
-            "x" : function(d, i) {
-                return legendElementWidth * i;
-            },
-            "y" : (height + gridSize)
-        });
+        // // legend SVG element
+        // var quantiles = [0].concat(colorScale.quantiles());
+        // var legend = svg.selectAll(".legend").data(quantiles, function(d) {
+        // return d;
+        // }).enter().append("g").attr({
+        // "class" : "legend"
+        // });
+        //
+        // // legend rectangles
+        // legend.append("rect").attr("x", function(d, i) {
+        // return legendElementWidth * i;
+        // }).attr({
+        // "y" : height,
+        // "width" : legendElementWidth,
+        // "height" : (gridSize / 2)
+        // }).style("fill", function(d, i) {
+        // return colors[i];
+        // });
+        //
+        // // legend text
+        // legend.append("text").attr("class", "mono").text(function(d) {
+        // return "≥ " + Math.round(d);
+        // }).attr({
+        // "x" : function(d, i) {
+        // return legendElementWidth * i;
+        // },
+        // "y" : (height + gridSize)
+        // });
     });
 }
 

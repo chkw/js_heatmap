@@ -115,3 +115,12 @@ function heatmapData(deserializedJson, settings) {
         return result;
     };
 }
+
+function lengthOfLongestString(arrayOfStrings) {
+    var lengths = new Array();
+    for (var i in arrayOfStrings) {
+        lengths.push(arrayOfStrings[i].length);
+    }
+    var maxLength = Math.max.apply(null, lengths);
+    return maxLength;
+}
