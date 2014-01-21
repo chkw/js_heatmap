@@ -23,7 +23,17 @@ function setHeatmapData(url) {
             "columnFeature" : "Group",
             "valueFeature" : "State",
             "nameFeature" : "State",
-            "colorMapper" : discreteColorMapper
+            "colorMapper" : function(d) {
+                color = "grey";
+                if (d.toLowerCase() == "error") {
+                    color = "red";
+                } else if (d.toLowerCase() == "pending") {
+                    color = "yellow";
+                } else if (d.toLowerCase() == "ready") {
+                    color = "green";
+                }
+                return color;
+            }
         };
 
         var dataObj = new heatmapData(data, settings);
