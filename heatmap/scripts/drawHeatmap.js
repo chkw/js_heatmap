@@ -54,10 +54,13 @@ function setHeatmapData(url) {
 
         // dataObj.setColorMapper(colorScale);
 
-        var top = 9 * lengthOfLongestString(dataObj.getColumnNames());
+        var longestColumnName = lengthOfLongestString(dataObj.getColumnNames());
+        var longestRowName = lengthOfLongestString(dataObj.getRowNames());
+
+        var top = (longestColumnName > 3) ? (9 * longestColumnName) : 30;
         var right = 0;
         var bottom = 0;
-        var left = 8 * lengthOfLongestString(dataObj.getRowNames());
+        var left = (longestRowName > 1) ? (8 * longestRowName) : 15;
 
         var margin = {
             "top" : top,
@@ -65,6 +68,8 @@ function setHeatmapData(url) {
             "bottom" : bottom,
             "left" : left
         };
+        console.log("margin->" + JSON.stringify(margin));
+
         // document.documentElement.clientWidth
         var fullWidth = document.documentElement.clientWidth;
         // document.documentElement.clientHeight
