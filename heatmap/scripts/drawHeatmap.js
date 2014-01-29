@@ -24,7 +24,7 @@ function setHeatmapData(url) {
             "columnFeature" : "Group",
             "valueFeature" : "State",
             "nameFeature" : "State",
-            "colorMapper" : function(d) {
+            "colorMapper" : function(d, i) {
                 color = "darkgrey";
                 if (d.toLowerCase() == "error") {
                     color = "red";
@@ -34,6 +34,15 @@ function setHeatmapData(url) {
                     color = "green";
                 }
                 return color;
+            },
+            "rowClickback" : function(d, i) {
+                console.log("rowClickback: " + d);
+            },
+            "columnClickback" : function(d, i) {
+                console.log("columnClickback: " + d);
+            },
+            "cellClickback" : function(d, i) {
+                console.log("cellClickback: r" + d.getRow() + " c" + d.getColumn() + " name" + d.getName() + " val" + d.getValue());
             }
         };
 
@@ -102,7 +111,10 @@ function setHeatmapData(url) {
             "class" : function(d, i) {
                 return "rowLabel mono axis axis-row";
             }
-        }).style("text-anchor", "end");
+        }).style({
+            "text-anchor" : "end",
+            "cursor" : "pointer"
+        }).on("click", dataObj.getRowClickback());
 
         // col labels
         var rotationDegrees = -90;
@@ -119,7 +131,10 @@ function setHeatmapData(url) {
             "class" : function(d, i) {
                 return "colLabel mono axis axis-col";
             }
-        }).style("text-anchor", "start");
+        }).style({
+            "text-anchor" : "start",
+            "cursor" : "pointer"
+        }).on("click", dataObj.getColumnClickback());
 
         // heatmap SVG elements
         var heatMap = svg.selectAll(".hour").data(dataObj.getData()).enter().append("rect").attr({
@@ -137,12 +152,13 @@ function setHeatmapData(url) {
             "class" : "hour bordered",
             "width" : gridSize,
             "height" : gridSize
-        }).style("fill", "#ffffd9");
+        }).style({
+            "fill" : "#ffffd9",
+            "cursor" : "pointer"
+        });
 
         // TODO heatmap click event
-        heatMap.on("click", function(d, i) {
-            console.log("clicked cell: r" + d.getRow() + " c" + d.getColumn() + " name" + d.getName() + " val" + d.getValue());
-        });
+        heatMap.on("click", dataObj.getCellClickback());
 
         // heatmap transition/animation
         heatMap.transition().duration(1000).style("fill", function(d) {
