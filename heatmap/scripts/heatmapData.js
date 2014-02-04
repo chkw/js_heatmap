@@ -37,6 +37,15 @@ function heatmapData(deserializedJson, settings) {
     this.cellClickback = function(d, i) {
         return null;
     };
+    this.rowRightClickback = function(d, i) {
+        return null;
+    };
+    this.columnRightClickback = function(d, i) {
+        return null;
+    };
+    this.cellRightClickback = function(d, i) {
+        return null;
+    };
 
     if (settings != null) {
         if ("rowFeature" in settings) {
@@ -62,6 +71,15 @@ function heatmapData(deserializedJson, settings) {
         }
         if ("cellClickback" in settings) {
             this.cellClickback = settings["cellClickback"];
+        }
+        if ("rowRightClickback" in settings) {
+            this.rowRightClickback = settings["rowRightClickback"];
+        }
+        if ("columnRightClickback" in settings) {
+            this.columnRightClickback = settings["columnRightClickback"];
+        }
+        if ("cellRightClickback" in settings) {
+            this.cellRightClickback = settings["cellRightClickback"];
         }
     }
 
@@ -89,6 +107,18 @@ function heatmapData(deserializedJson, settings) {
 
     this.getCellClickback = function() {
         return this.cellClickback;
+    };
+
+    this.getRowRightClickback = function() {
+        return this.rowRightClickback;
+    };
+
+    this.getColumnRightClickback = function() {
+        return this.columnRightClickback;
+    };
+
+    this.getCellRightClickback = function() {
+        return this.cellRightClickback;
     };
 
     this.getColorMapper = function() {
