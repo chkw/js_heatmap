@@ -19,114 +19,82 @@ function cellData(newCellData) {
     };
 }
 
-function heatmapData(deserializedJson, settings) {
+function heatmapData(deserializedJson, newSettings) {
+    this.data = null;
+    this.settings = null;
 
-    this.rowFeature = "row";
-    this.columnFeature = "column";
-    this.valueFeature = "value";
-    this.nameFeature = "value";
-    this.colorMapper = function(d, i) {
-        return null;
-    };
-    this.rowClickback = function(d, i) {
-        return null;
-    };
-    this.columnClickback = function(d, i) {
-        return null;
-    };
-    this.cellClickback = function(d, i) {
-        return null;
-    };
-    this.rowRightClickback = function(d, i) {
-        return null;
-    };
-    this.columnRightClickback = function(d, i) {
-        return null;
-    };
-    this.cellRightClickback = function(d, i) {
-        return null;
+    this.initializeObject = function(deserializedJson, newSettings) {
+
+        this.settings = new Object();
+
+        this.settings["rowFeature"] = "row";
+        this.settings["columnFeature"] = "column";
+        this.settings["valueFeature"] = "value";
+        this.settings["nameFeature"] = "value";
+        this.setQuantileColorMapper();
+
+        this.setSettings(newSettings);
+        this.setData(deserializedJson);
     };
 
-    if (settings != null) {
-        if ("rowFeature" in settings) {
-            this.rowFeature = settings["rowFeature"];
+    this.setData = function(newData) {
+        this.data = new Array();
+        for (var i in deserializedJson) {
+            this.data.push(new cellData({
+                "row" : deserializedJson[i][this.settings["rowFeature"]],
+                "column" : deserializedJson[i][this.settings["columnFeature"]],
+                "value" : deserializedJson[i][this.settings["valueFeature"]],
+                "name" : deserializedJson[i][this.settings["nameFeature"]]
+            }));
         }
-        if ("columnFeature" in settings) {
-            this.columnFeature = settings["columnFeature"];
-        }
-        if ("valueFeature" in settings) {
-            this.valueFeature = settings["valueFeature"];
-        }
-        if ("nameFeature" in settings) {
-            this.nameFeature = settings["nameFeature"];
-        }
-        if ("colorMapper" in settings) {
-            this.colorMapper = settings["colorMapper"];
-        }
-        if ("rowClickback" in settings) {
-            this.rowClickback = settings["rowClickback"];
-        }
-        if ("columnClickback" in settings) {
-            this.columnClickback = settings["columnClickback"];
-        }
-        if ("cellClickback" in settings) {
-            this.cellClickback = settings["cellClickback"];
-        }
-        if ("rowRightClickback" in settings) {
-            this.rowRightClickback = settings["rowRightClickback"];
-        }
-        if ("columnRightClickback" in settings) {
-            this.columnRightClickback = settings["columnRightClickback"];
-        }
-        if ("cellRightClickback" in settings) {
-            this.cellRightClickback = settings["cellRightClickback"];
-        }
-    }
-
-    this.data = new Array();
-    for (var i in deserializedJson) {
-        this.data.push(new cellData({
-            "row" : deserializedJson[i][this.rowFeature],
-            "column" : deserializedJson[i][this.columnFeature],
-            "value" : deserializedJson[i][this.valueFeature],
-            "name" : deserializedJson[i][this.nameFeature]
-        }));
-    }
+    };
 
     this.getData = function() {
         return this.data;
     };
 
+    this.setSettings = function(settings) {
+        if (settings != null) {
+            for (var i in settings) {
+                this.settings[i] = settings[i];
+            }
+        }
+    };
+
+    this.getSetting = function(settingName) {
+        return this.settings[settingName];
+    };
+
     this.getRowClickback = function() {
-        return this.rowClickback;
+        return this.getSetting("rowClickback");
     };
 
     this.getColumnClickback = function() {
-        return this.columnClickback;
+        return this.getSetting("columnClickback");
     };
 
     this.getCellClickback = function() {
-        return this.cellClickback;
+        return this.getSetting("cellClickback");
     };
 
     this.getRowRightClickback = function() {
-        return this.rowRightClickback;
+        return this.getSetting("rowRightClickback");
     };
 
     this.getColumnRightClickback = function() {
-        return this.columnRightClickback;
+        return this.getSetting("columnRightClickback");
     };
 
     this.getCellRightClickback = function() {
-        return this.cellRightClickback;
+        return this.getSetting("cellRightClickback");
     };
 
     this.getColorMapper = function() {
-        return this.colorMapper;
+        return this.getSetting("colorMapper");
     };
 
     this.setColorMapper = function(mapper) {
-        this.colorMapper = mapper;
+        return this.settings["colorMapper"] = mapper;
     };
 
     /**
@@ -142,7 +110,7 @@ function heatmapData(deserializedJson, settings) {
         var colorScale = d3.scale.quantile().domain([0, buckets - 1, d3.max(this.getAllValues(), function(d) {
             return parseFloat(d);
         })]).range(colors);
-        this.colorMapper = colorScale;
+        this.setColorMapper(colorScale);
     };
 
     this.getColumnNames = function() {
@@ -192,6 +160,8 @@ function heatmapData(deserializedJson, settings) {
         }
         return result;
     };
+
+    this.initializeObject(deserializedJson, newSettings);
 }
 
 function lengthOfLongestString(arrayOfStrings) {
