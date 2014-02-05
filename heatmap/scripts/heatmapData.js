@@ -31,7 +31,6 @@ function heatmapData(deserializedJson, newSettings) {
         this.settings["columnFeature"] = "column";
         this.settings["valueFeature"] = "value";
         this.settings["nameFeature"] = "value";
-        this.setQuantileColorMapper();
 
         this.setSettings(newSettings);
         this.setData(deserializedJson);
@@ -46,6 +45,9 @@ function heatmapData(deserializedJson, newSettings) {
                 "value" : deserializedJson[i][this.settings["valueFeature"]],
                 "name" : deserializedJson[i][this.settings["nameFeature"]]
             }));
+        }
+        if (this.getColorMapper() == null) {
+            this.setQuantileColorMapper();
         }
     };
 
