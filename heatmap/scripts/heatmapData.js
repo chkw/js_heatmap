@@ -185,7 +185,7 @@ function heatmapData(deserializedJson, newSettings) {
     };
 
     this.addUniformRow = function(rowName, value) {
-        if ( rowName in this.getRowNames()) {
+        if (this.getRowNames().indexOf(rowName) >= 0) {
             return;
         }
         var columnNames = this.getColumnNames();
@@ -197,6 +197,17 @@ function heatmapData(deserializedJson, newSettings) {
                 "value" : value,
                 "name" : "uniform values for row " + rowName
             }));
+        }
+    };
+
+    this.setRows = function(selectedRowNames) {
+        // delete unselected rows
+        this.filterRows(selectedRowNames);
+
+        // add missing rows
+        for (var i in selectedRowNames) {
+            var selectedRowName = selectedRowNames[i];
+            this.addUniformRow(selectedRowName, null);
         }
     };
 
