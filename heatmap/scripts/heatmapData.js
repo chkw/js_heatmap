@@ -163,6 +163,43 @@ function heatmapData(deserializedJson, newSettings) {
         return result;
     };
 
+    this.filterRows = function(selectedRowNames) {
+        var deleteList = new Array();
+        var currentRowNames = this.getRowNames();
+        for (var i in currentRowNames) {
+            var currentRowName = currentRowNames[i];
+            if (selectedRowNames.indexOf(currentRowName) > -1) {
+                // keep row
+            } else {
+                //delete row
+                deleteList.push(currentRowName);
+            }
+        }
+        // iterate over cells from the end of the array
+        for (var i = this.data.length - 1; i >= 0; i--) {
+            var rowName = this.data[i].getRow();
+            if (deleteList.indexOf(rowName) >= 0) {
+                this.data.splice(i, 1);
+            }
+        }
+    };
+
+    this.addUniformRow = function(rowName, value) {
+        if ( rowName in this.getRowNames()) {
+            return;
+        }
+        var columnNames = this.getColumnNames();
+        for (var i in columnNames) {
+            var columnName = columnNames[i];
+            this.data.push(new cellData({
+                "row" : rowName,
+                "column" : columnName,
+                "value" : value,
+                "name" : "uniform values for row " + rowName
+            }));
+        }
+    };
+
     this.initializeObject(deserializedJson, newSettings);
 }
 
