@@ -5,6 +5,8 @@
  */
 function cellData(newCellData) {
     this.data = newCellData;
+    this.data["features"] = new Object();
+
     this.getRow = function() {
         return this.data["row"];
     };
@@ -16,6 +18,22 @@ function cellData(newCellData) {
     };
     this.getName = function() {
         return this.data["name"];
+    };
+
+    // a cell may represent data for multiple events/features
+    this.getAllFeatures = function() {
+        return this.data["features"];
+    };
+    this.getFeatureValue = function(feature) {
+        var value = null;
+        if ( feature in this.data["features"]) {
+            value = this.data["features"][feature];
+        }
+        return value;
+    };
+    this.setValue = function(feature, value) {
+        this.data["features"][feature] = value;
+        return this;
     };
 }
 
