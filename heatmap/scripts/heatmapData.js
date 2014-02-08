@@ -61,6 +61,8 @@ function heatmapData() {
         if (settings["colorMapper"] == null) {
             var quantileColorMapper = this.setupQuantileColorMapper(allValues);
             this.setColorMapper(settings["datatype"], quantileColorMapper);
+        } else {
+            this.setColorMapper(settings["datatype"], settings["colorMapper"]);
         }
 
         return this;
