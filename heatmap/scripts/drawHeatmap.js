@@ -46,7 +46,8 @@ function setHeatmapData(url) {
             }
         };
 
-        var dataObj = new heatmapData(data, settings);
+        var dataObj = new heatmapData();
+        dataObj.addData(data, settings);
 
         var colNames = dataObj.getColumnNames().sort();
 
@@ -162,7 +163,9 @@ function setHeatmapData(url) {
 
         // heatmap transition/animation
         heatMap.transition().duration(1000).style("fill", function(d) {
-            return dataObj.getColorMapper()(d.getValue());
+            var datatype = d.getDatatype();
+            var colorMapper = dataObj.getColorMapper(datatype);
+            return colorMapper(d.getValue());
         });
 
         // heatmap titles
