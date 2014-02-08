@@ -17,38 +17,53 @@ function cellData(newCellData) {
     this.getName = function() {
         return this.data["name"];
     };
+    this.getDatatype = function() {
+        return this.data["datatype"];
+    };
 }
 
-function heatmapData(deserializedJson, newSettings) {
-    this.data = null;
-    this.settings = null;
+function heatmapData() {
+    this.data = new Array();
+    this.clickBacks = new Object();
+    this.colorMappers = new Object();
 
-    this.initializeObject = function(deserializedJson, newSettings) {
+    this.addData = function(newDeserializedJson, newSettings) {
+        var settings = {
+            "rowFeature" : "row",
+            "columnFeature" : "column",
+            "valueFeature" : "value",
+            "nameFeature" : "value",
+            "datatype" : "unspecified"
+        };
 
-        this.settings = new Object();
+        if (newSettings != null) {
+            for (var key in newSettings) {
+                settings[key] = newSettings[key];
+                if (endsWith(key, "Clickback")) {
+                    this.clickBacks[key] = settings[key];
+                }
+            }
+        }
 
-        this.settings["rowFeature"] = "row";
-        this.settings["columnFeature"] = "column";
-        this.settings["valueFeature"] = "value";
-        this.settings["nameFeature"] = "value";
+        var allValues = new Array();
 
-        this.setSettings(newSettings);
-        this.setData(deserializedJson);
-    };
-
-    this.setData = function(newData) {
-        this.data = new Array();
-        for (var i in deserializedJson) {
+        for (var cell in newDeserializedJson) {
             this.data.push(new cellData({
-                "row" : deserializedJson[i][this.settings["rowFeature"]],
-                "column" : deserializedJson[i][this.settings["columnFeature"]],
-                "value" : deserializedJson[i][this.settings["valueFeature"]],
-                "name" : deserializedJson[i][this.settings["nameFeature"]]
+                "row" : newDeserializedJson[cell][settings["rowFeature"]],
+                "column" : newDeserializedJson[cell][settings["columnFeature"]],
+                "value" : newDeserializedJson[cell][settings["valueFeature"]],
+                "name" : newDeserializedJson[cell][settings["nameFeature"]],
+                "datatype" : settings["datatype"]
             }));
+            allValues.push(newDeserializedJson[cell][settings["valueFeature"]]);
         }
-        if (this.getColorMapper() == null) {
-            this.setQuantileColorMapper();
+
+        if (settings["colorMapper"] == null) {
+            var quantileColorMapper = this.setupQuantileColorMapper(allValues);
+            this.setColorMapper(settings["datatype"], quantileColorMapper);
         }
+
+        return this;
     };
 
     this.getData = function() {
@@ -68,51 +83,56 @@ function heatmapData(deserializedJson, newSettings) {
     };
 
     this.getRowClickback = function() {
-        return this.getSetting("rowClickback");
+        return this.clickBacks[("rowClickback")];
     };
 
     this.getColumnClickback = function() {
-        return this.getSetting("columnClickback");
+        return this.clickBacks[("columnClickback")];
     };
 
     this.getCellClickback = function() {
-        return this.getSetting("cellClickback");
+        return this.clickBacks[("cellClickback")];
     };
 
     this.getRowRightClickback = function() {
-        return this.getSetting("rowRightClickback");
+        return this.clickBacks[("rowRightClickback")];
     };
 
     this.getColumnRightClickback = function() {
-        return this.getSetting("columnRightClickback");
+        return this.clickBacks[("columnRightClickback")];
     };
 
     this.getCellRightClickback = function() {
-        return this.getSetting("cellRightClickback");
+        return this.clickBacks[("cellRightClickback")];
     };
 
-    this.getColorMapper = function() {
-        return this.getSetting("colorMapper");
+    this.setColorMapper = function(datatype, colorMapper) {
+        this.colorMappers[datatype] = colorMapper;
     };
 
-    this.setColorMapper = function(mapper) {
-        return this.settings["colorMapper"] = mapper;
+    this.getColorMapper = function(datatype) {
+        return this.colorMappers[datatype];
     };
+
+    // this.setColorMapper = function(mapper) {
+    // return this.settings["colorMapper"] = mapper;
+    // };
 
     /**
      * If palette not provided, a default palette is used.
      */
-    this.setQuantileColorMapper = function(palette) {
+    this.setupQuantileColorMapper = function(allDataValues, palette) {
         // color scale
         var colors = palette;
         if (colors == null) {
             colors = ["#ffffd9", "#edf8b1", "#c7e9b4", "#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#253494", "#081d58"];
         }
         var buckets = colors.length;
-        var colorScale = d3.scale.quantile().domain([0, buckets - 1, d3.max(this.getAllValues(), function(d) {
+        var colorScale = d3.scale.quantile().domain([0, buckets - 1, d3.max(allDataValues, function(d) {
             return parseFloat(d);
         })]).range(colors);
-        this.setColorMapper(colorScale);
+
+        return colorScale;
     };
 
     this.getColumnNames = function() {
@@ -147,21 +167,21 @@ function heatmapData(deserializedJson, newSettings) {
         return result;
     };
 
-    this.getAllValues = function() {
-        var values = new Object();
-        for (var i in this.data) {
-            var val = this.data[i].getValue() + "QQ";
-            if (!val in values) {
-                values[val] = 0;
-            }
-            values[val]++;
-        }
-        var result = new Array();
-        for (var val in values) {
-            result.push(val.replace(/QQ/, ""));
-        }
-        return result;
-    };
+    // this.getAllValues = function() {
+    // var values = new Object();
+    // for (var i in this.data) {
+    // var val = this.data[i].getValue() + "QQ";
+    // if (!val in values) {
+    // values[val] = 0;
+    // }
+    // values[val]++;
+    // }
+    // var result = new Array();
+    // for (var val in values) {
+    // result.push(val.replace(/QQ/, ""));
+    // }
+    // return result;
+    // };
 
     this.filterRows = function(selectedRowNames) {
         var deleteList = new Array();
@@ -210,8 +230,6 @@ function heatmapData(deserializedJson, newSettings) {
             this.addUniformRow(selectedRowName, null);
         }
     };
-
-    this.initializeObject(deserializedJson, newSettings);
 }
 
 function lengthOfLongestString(arrayOfStrings) {
@@ -221,4 +239,8 @@ function lengthOfLongestString(arrayOfStrings) {
     }
     var maxLength = Math.max.apply(null, lengths);
     return maxLength;
+}
+
+function endsWith(str, suffix) {
+    return str.indexOf(suffix, str.length - suffix.length) !== -1;
 }
