@@ -228,27 +228,40 @@ function heatmapData() {
     };
 
     /**
-     * Get all of the rows for a column.
+     * Get the cells that have the specified columnName, rowName, and/or datatype.
      */
-    this.getColumn = function(columnName) {
-        var rows = new Array();
-        for (var i in this.data) {
-            var cellData = this.data[i];
-            if (cellData.getColumn() == columnName) {
-                rows.push(cellData);
-            }
-        }
-        return rows;
-    };
-
-    /**
-     * Get the cells that have the specified columnName and rowName.
-     */
-    this.getCell = function(columnName, rowName) {
+    this.getCells = function(columnName, rowName, datatype) {
         var cells = new Array();
         for (var i in this.data) {
             var cellData = this.data[i];
-            if (cellData.getColumn() == columnName && cellData.getRow() == rowName) {
+            if ((columnName == null) && (rowName == null) && (datatype == null)) {
+                return this.data;
+            }
+            if ((rowName == null) && (datatype == null)) {
+                if (cellData.getColumn() == columnName) {
+                    cells.push(cellData);
+                }
+            } else if ((columnName == null) && (datatype == null)) {
+                if (cellData.getRow() == rowName) {
+                    cells.push(cellData);
+                }
+            } else if ((rowName == null) && (columnName == null)) {
+                if (cellData.getDatatype() == datatype) {
+                    cells.push(cellData);
+                }
+            } else if (datatype == null) {
+                if ((cellData.getColumn() == columnName) && (cellData.getRow() == rowName)) {
+                    cells.push(cellData);
+                }
+            } else if (rowName == null) {
+                if ((cellData.getColumn() == columnName) && (cellData.getDatatype() == datatype)) {
+                    cells.push(cellData);
+                }
+            } else if (columnName == null) {
+                if ((cellData.getDatatype() == datatype) && (cellData.getRow() == rowName)) {
+                    cells.push(cellData);
+                }
+            } else if ((cellData.getDatatype() == datatype) && (cellData.getRow() == rowName) && (cellData.getColumn() == columnName)) {
                 cells.push(cellData);
             }
         }
