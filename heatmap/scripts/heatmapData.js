@@ -139,33 +139,27 @@ function heatmapData() {
     };
 
     this.getColumnNames = function() {
-        var values = new Object();
-        for (var i in this.data) {
-            var val = this.data[i].getColumn() + "QQ";
-            if (!val in values) {
-                values[val] = 0;
-            }
-            values[val]++;
-        }
         var result = new Array();
-        for (var val in values) {
-            result.push(val.replace(/QQ/, ""));
+        for (var i in this.data) {
+            var val = this.data[i].getColumn();
+            if (result.indexOf(val) >= 0) {
+                // don't add. already in list
+            } else {
+                result.push(val);
+            }
         }
         return result;
     };
 
     this.getRowNames = function() {
-        var values = new Object();
-        for (var i in this.data) {
-            var val = this.data[i].getRow() + "QQ";
-            if (!val in values) {
-                values[val] = 0;
-            }
-            values[val]++;
-        }
         var result = new Array();
-        for (var val in values) {
-            result.push(val.replace(/QQ/, ""));
+        for (var i in this.data) {
+            var val = this.data[i].getRow();
+            if (result.indexOf(val) >= 0) {
+                // don't add. already in list
+            } else {
+                result.push(val);
+            }
         }
         return result;
     };
@@ -229,6 +223,7 @@ function heatmapData() {
 
     /**
      * Get the cells that have the specified columnName, rowName, and/or datatype.
+     * Assumes you're not looking for cells with a 'null' value.
      */
     this.getCells = function(columnName, rowName, datatype) {
         var cells = new Array();
@@ -266,6 +261,15 @@ function heatmapData() {
             }
         }
         return cells;
+    };
+
+    /**
+     * Get a sorted list of column names
+     */
+    this.sortColumns = function(rowName, datatype) {
+        var columns = new Array();
+        // TODO sort columns
+        return columns;
     };
 }
 
