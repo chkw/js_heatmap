@@ -226,6 +226,34 @@ function heatmapData() {
             this.addUniformRow(selectedRowName, null);
         }
     };
+
+    /**
+     * Get all of the rows for a column.
+     */
+    this.getColumn = function(columnName) {
+        var rows = new Array();
+        for (var i in this.data) {
+            var cellData = this.data[i];
+            if (cellData.getColumn() == columnName) {
+                rows.push(cellData);
+            }
+        }
+        return rows;
+    };
+
+    /**
+     * Get the cells that have the specified columnName and rowName.
+     */
+    this.getCell = function(columnName, rowName) {
+        var cells = new Array();
+        for (var i in this.data) {
+            var cellData = this.data[i];
+            if (cellData.getColumn() == columnName && cellData.getRow() == rowName) {
+                cells.push(cellData);
+            }
+        }
+        return cells;
+    };
 }
 
 function lengthOfLongestString(arrayOfStrings) {
