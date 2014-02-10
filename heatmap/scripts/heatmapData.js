@@ -45,6 +45,7 @@ function heatmapData() {
             }
         }
 
+        // for default quantile color mapper
         var allValues = new Array();
 
         for (var cell in newDeserializedJson) {
@@ -169,22 +170,9 @@ function heatmapData() {
         return result;
     };
 
-    // this.getAllValues = function() {
-    // var values = new Object();
-    // for (var i in this.data) {
-    // var val = this.data[i].getValue() + "QQ";
-    // if (!val in values) {
-    // values[val] = 0;
-    // }
-    // values[val]++;
-    // }
-    // var result = new Array();
-    // for (var val in values) {
-    // result.push(val.replace(/QQ/, ""));
-    // }
-    // return result;
-    // };
-
+    /**
+     * Remove unselected rows.
+     */
     this.filterRows = function(selectedRowNames) {
         var deleteList = new Array();
         var currentRowNames = this.getRowNames();
@@ -206,6 +194,9 @@ function heatmapData() {
         }
     };
 
+    /**
+     * Add one row of uniform values to all columns.
+     */
     this.addUniformRow = function(rowName, value) {
         if (this.getRowNames().indexOf(rowName) >= 0) {
             return;
@@ -222,6 +213,9 @@ function heatmapData() {
         }
     };
 
+    /**
+     * Set the rows to display.  Unselected rows will be deleted.  Missing rows will be added.
+     */
     this.setRows = function(selectedRowNames) {
         // delete unselected rows
         this.filterRows(selectedRowNames);
