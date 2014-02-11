@@ -264,12 +264,55 @@ function heatmapData() {
     };
 
     /**
-     * Get a sorted list of column names
+     * Get a sorted list of column names from a list of cells.
      */
-    this.sortColumns = function(rowName, datatype) {
-        var columns = new Array();
-        // TODO sort columns
-        return columns;
+    this.sortColumns = function(rowName, datatype, cellList) {
+        var sortedNames = new Array();
+        var columns = cellList;
+        if (columns == null) {
+            columns = this.getCells(null, rowName, null);
+        }
+        columns.sort(compareCells);
+
+        /**
+         * comparison function
+         */
+        function compareCells(a, b) {
+            // check datatype
+            var aType = a.getDatatype();
+            var bType = b.getDatatype();
+            if ((aType != datatype) && (bType != datatype)) {
+                return 0;
+            } else if (aType != datatype) {
+                return -1;
+            } else if (bType != datatype) {
+                return 1;
+            }
+
+            // check value
+            var aVal = a.getValue();
+            var bVal = b.getValue();
+            if ((aVal == null) && (bVal == null)) {
+                return 0;
+            } else if (aVal == null) {
+                return -1;
+            } else if (bVal == null) {
+                return 1;
+            } else if (aVal > bVal) {
+                return 1;
+            } else if (aVal < bVal) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+
+        for (var i in columns) {
+            var cellData = columns[i];
+            sortedNames.push(cellData.getColumn());
+        }
+
+        return sortedNames;
     };
 }
 
