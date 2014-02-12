@@ -79,10 +79,16 @@ function heatmapData() {
                 this.settings[i] = settings[i];
             }
         }
+        return this;
     };
 
     this.getSetting = function(settingName) {
         return this.settings[settingName];
+    };
+
+    this.setClickback = function(key, value) {
+        this.clickBacks[key] = value;
+        return this;
     };
 
     this.getRowClickback = function() {
@@ -186,6 +192,7 @@ function heatmapData() {
                 this.data.splice(i, 1);
             }
         }
+        return this;
     };
 
     /**
@@ -205,6 +212,7 @@ function heatmapData() {
                 "name" : "uniform values for row " + rowName
             }));
         }
+        return this;
     };
 
     /**
@@ -219,6 +227,7 @@ function heatmapData() {
             var selectedRowName = selectedRowNames[i];
             this.addUniformRow(selectedRowName, null);
         }
+        return this;
     };
 
     /**
