@@ -3,6 +3,53 @@
  * 15JAN14
  * heatmapData.js contains objects meant to facilitate the drawing of heatmaps via d3.js.
  */
+
+/**
+ * Keep track of sorting.
+ */
+function sortingInstructions() {
+    this.instructions = new Array();
+
+    this.getInstructions = function() {
+        return this.instructions;
+    };
+
+    this.getIndex = function(name) {
+        var result = -1;
+        for (var i = 0; i < this.instructions.length; i++) {
+            if (this.instructions[i]["name"] == name) {
+                return i;
+            }
+        }
+        return result;
+    };
+
+    this.addInstruction = function(name) {
+        var index = this.getIndex(name);
+        if (index >= 0) {
+            var c = this.instructions.splice(index, 1)[0];
+            c["reverse"] = !c["reverse"];
+            this.instructions.push(c);
+        } else {
+            this.instructions.push({
+                "name" : name,
+                "reverse" : false
+            });
+        }
+    };
+
+    this.removeInstruction = function(name) {
+        var index = this.getIndex(name);
+        if (index >= 0) {
+            this.instructions.splice(index, 1);
+        }
+    };
+
+    this.clearInstructions = function() {
+        this.instructions.splice(0, this.instructions.length);
+    };
+}
+
 function cellData(newCellData) {
     this.data = newCellData;
     this.getRow = function() {
@@ -270,6 +317,11 @@ function heatmapData() {
             }
         }
         return cells;
+    };
+
+    // TODO multi-sort
+    this.multiSortColumns = function(sortingInstructions) {
+
     };
 
     /**
