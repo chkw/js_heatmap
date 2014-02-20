@@ -7,46 +7,49 @@
 /**
  * Keep track of sorting.
  */
-function sortingInstructions() {
-    this.instructions = new Array();
+function sortingSteps(arrayOfSteps) {
+    this.steps = new Array();
+    if (arrayOfSteps != null) {
+        this.steps = arrayOfSteps;
+    }
 
-    this.getInstructions = function() {
-        return this.instructions;
+    this.getSteps = function() {
+        return this.steps;
     };
 
     this.getIndex = function(name) {
         var result = -1;
-        for (var i = 0; i < this.instructions.length; i++) {
-            if (this.instructions[i]["name"] == name) {
+        for (var i = 0; i < this.steps.length; i++) {
+            if (this.steps[i]["name"] == name) {
                 return i;
             }
         }
         return result;
     };
 
-    this.addInstruction = function(name) {
+    this.addStep = function(name) {
         var index = this.getIndex(name);
         if (index >= 0) {
-            var c = this.instructions.splice(index, 1)[0];
+            var c = this.steps.splice(index, 1)[0];
             c["reverse"] = !c["reverse"];
-            this.instructions.push(c);
+            this.steps.push(c);
         } else {
-            this.instructions.push({
+            this.steps.push({
                 "name" : name,
                 "reverse" : false
             });
         }
     };
 
-    this.removeInstruction = function(name) {
+    this.removeStep = function(name) {
         var index = this.getIndex(name);
         if (index >= 0) {
-            this.instructions.splice(index, 1);
+            this.steps.splice(index, 1);
         }
     };
 
-    this.clearInstructions = function() {
-        this.instructions.splice(0, this.instructions.length);
+    this.clearSteps = function() {
+        this.steps.splice(0, this.steps.length);
     };
 }
 
@@ -320,7 +323,113 @@ function heatmapData() {
     };
 
     // TODO multi-sort
-    this.multiSortColumns = function(sortingInstructions) {
+    /**
+     * Get a sorted list of column names from a list of cells.
+     */
+    // this.multiSortColumns = function(rowName, datatype, cellList) {
+    this.multiSortColumns = function(sortingSteps) {
+        var steps = sortingSteps.getSteps().reverse();
+        // columns is one row of cells from the data
+
+        var allColNames = this.getColumnNames();
+        var sortingData = new Array();
+
+        // create array of sorting objects
+        var dataHash = new Object();
+        for (var a = 0; a < allColNames.length; a++) {
+            var colName = allColNames[a];
+            var data = null;
+
+            if ( colName in dataHash) {
+            } else {
+                dataHash[colName] = new Object();
+            }
+            data = dataHash[colName];
+
+            for (var b = 0; b < steps.length; b++) {
+                var step = steps[b];
+                var rowName = step["name"];
+                var datatype = null;
+
+                var cellData = this.getCells(colName, rowName, datatype);
+                if (cellData.length == 1) {
+                    data[rowName] = cellData[0].getValue();
+                } else {
+                    console.log(cellData.length + " cellData objects for", colName, rowName, datatype);
+                    data[rowName] = null;
+                }
+            }
+        }
+
+        // convert hash to array
+        for (var col in dataHash) {
+            var data = new Array();
+            for (var b = 0; b < steps.length; b++) {
+                data.push(dataHash[col][steps[b]["name"]]);
+            }
+            sortingData.push({
+                "column" : col,
+                "data" : data
+            });
+        }
+
+        // sort objects
+        sortingData.sort(compareColumns);
+
+        // return column names in sorted ordersortedNames = new Array();
+        var sortedNames = new Array();
+        for (var k = 0; k < sortingData.length; k++) {
+            sortedNames.push(sortingData[k]["column"]);
+        }
+
+        return sortedNames;
+
+        /**
+         * comparison function
+         */
+        function compareColumns(a, b) {
+
+            var aData = a["data"];
+            var bData = b["data"];
+
+            if (aData.length != aData.length) {
+                console.log(a["column"] + " and " + b["column"] + " have different number of scores.");
+                return 0;
+            }
+
+            for (var i = 0; i < aData.length; i++) {
+                var sortingStep = steps[i];
+                var multiplier = sortingStep["reverse"] ? -1 : 1;
+
+                // convert to numbers
+                var scoreA = parseFloat(aData[i]);
+                var scoreB = parseFloat(bData[i]);
+
+                // handle non-numericals
+                // As per IEEE-754 spec, a nan checked for equality against itself will be unequal (in other words, nan != nan)
+                // ref: http://kineme.net/Discussion/DevelopingCompositions/CheckifnumberNaNjavascriptpatch
+                if (scoreA != scoreA || scoreB != scoreB) {
+                    if (scoreA != scoreA && scoreB != scoreB) {
+                        continue;
+                    } else if (scoreA != scoreA) {
+                        return -1 * multiplier;
+                    } else if (scoreB != scoreB) {
+                        return 1 * multiplier;
+                    }
+                }
+
+                if (scoreA < scoreB) {
+                    return -1 * multiplier;
+                }
+                if (scoreA > scoreB) {
+                    return 1 * multiplier;
+                } else {
+                    continue;
+                }
+            }
+            // Reach this if the score vectors are identical.
+            return 0;
+        }
 
     };
 
@@ -329,6 +438,8 @@ function heatmapData() {
      */
     this.sortColumns = function(rowName, datatype, cellList) {
         var sortedNames = new Array();
+
+        // columns is one row of cells from the data
         var columns = cellList;
         if (columns == null) {
             columns = this.getCells(null, rowName, null);
@@ -342,7 +453,9 @@ function heatmapData() {
             // check datatype
             var aType = a.getDatatype();
             var bType = b.getDatatype();
-            if ((aType != datatype) && (bType != datatype)) {
+            if (datatype == null) {
+                // TODO no datatype specified
+            } else if ((aType != datatype) && (bType != datatype)) {
                 return 0;
             } else if (aType != datatype) {
                 return -1;
