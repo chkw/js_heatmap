@@ -70,6 +70,11 @@ function cellData(newCellData) {
     this.getDatatype = function() {
         return this.data["datatype"];
     };
+    this.transpose = function() {
+        var newRow = this.data["column"];
+        this.data["column"] = this.data["row"];
+        this.data["row"] = newRow;
+    };
 }
 
 function heatmapData() {
@@ -117,6 +122,12 @@ function heatmapData() {
         }
 
         return this;
+    };
+
+    this.transpose = function() {
+        for (var i = 0; i < this.data.length; i++) {
+            this.data[i].transpose();
+        }
     };
 
     this.getData = function() {
@@ -172,10 +183,6 @@ function heatmapData() {
     this.getColorMapper = function(datatype) {
         return this.colorMappers[datatype];
     };
-
-    // this.setColorMapper = function(mapper) {
-    // return this.settings["colorMapper"] = mapper;
-    // };
 
     /**
      * If palette not provided, a default palette is used.
@@ -269,6 +276,10 @@ function heatmapData() {
      * Set the rows to display.  Unselected rows will be deleted.  Missing rows will be added.
      */
     this.setRows = function(selectedRowNames) {
+        if (selectedRowNames == null) {
+            return this;
+        }
+
         // delete unselected rows
         this.filterRows(selectedRowNames);
 
