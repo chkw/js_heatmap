@@ -114,9 +114,11 @@ function heatmapData() {
             allValues.push(newDeserializedJson[cell][settings["valueFeature"]]);
         }
 
-        if (settings["colorMapper"] == null) {
+        if ((settings["colorMapper"] == null) || (settings["colorMapper"] == "quantile")) {
             var quantileColorMapper = this.setupQuantileColorMapper(allValues);
             this.setColorMapper(settings["datatype"], quantileColorMapper);
+        } else if (settings["colorMapper"] == "centered") {
+            this.setColorMapper(settings["datatype"], this.centeredRgbaColorMapper(true));
         } else {
             this.setColorMapper(settings["datatype"], settings["colorMapper"]);
         }
@@ -191,7 +193,8 @@ function heatmapData() {
         // color scale
         var colors = palette;
         if (colors == null) {
-            colors = ["#ffffd9", "#edf8b1", "#c7e9b4", "#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#253494", "#081d58"];
+            // colors = ["#ffffd9", "#edf8b1", "#c7e9b4", "#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#253494", "#081d58"];
+            colors = ["rgb(255,255,217)", "rgb(237,248,177)", "rgb(199,233,180)", "rgb(127,205,187)", "rgb(65,182,196)", "rgb(29,145,192)", "rgb(34,94,168)", "rgb(37,52,148)", "rgb(8,29,88)"];
         }
         var buckets = colors.length;
         var colorScale = d3.scale.quantile().domain([0, buckets - 1, d3.max(allDataValues, function(d) {
@@ -199,6 +202,64 @@ function heatmapData() {
         })]).range(colors);
 
         return colorScale;
+    };
+
+    /**
+     * centered RGBa color mapper
+     */
+    this.centeredRgbaColorMapper = function(log, centerVal, minNegVal, maxPosVal) {
+        var mapper = null;
+
+        var centerV = (centerVal == null) ? 0 : centerVal;
+        var minNegV = (minNegVal == null) ? -1.96 : minNegVal;
+        var maxPosV = (maxPosVal == null) ? 1.96 : maxPosVal;
+
+        mapper = function(val) {
+            var a = 1;
+            var r = 169;
+            var g = 169;
+            var b = 169;
+
+            var v = parseFloat(val);
+
+            if ((v == null) || (v != v)) {
+                // null or NaN values
+            } else if (v > centerV) {
+                r = 255;
+                g = 0;
+                b = 0;
+                if ((maxPosVal != null) && (v > maxPosV)) {
+                    a = 1;
+                } else {
+                    a = (v - centerV) / (maxPosV - centerV);
+                    a = Math.abs(a);
+                    if (log) {
+                        a = Math.log(a);
+                    }
+                }
+            } else if (v < centerV) {
+                r = 0;
+                g = 0;
+                b = 255;
+                if ((minNegVal != null) && (v < minNegV)) {
+                    a = 1;
+                } else {
+                    a = (v - centerV) / (minNegV - centerV);
+                    a = Math.abs(a);
+                    if (log) {
+                        a = Math.log(a);
+                    }
+                }
+            } else {
+                r = 255;
+                g = 255;
+                b = 255;
+                a = 1;
+            }
+            return "rgba(" + r + "," + g + "," + b + "," + a + ")";
+        };
+
+        return mapper;
     };
 
     this.getColumnNames = function() {
