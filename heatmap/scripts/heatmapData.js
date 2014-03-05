@@ -398,7 +398,6 @@ function heatmapData() {
     /**
      * Get a sorted list of column names from a list of cells.
      */
-    // this.multiSortColumns = function(rowName, datatype, cellList) {
     this.multiSortColumns = function(sortingSteps) {
         var steps = sortingSteps.getSteps().reverse();
         // columns is one row of cells from the data
@@ -466,6 +465,116 @@ function heatmapData() {
 
             if (aData.length != aData.length) {
                 console.log(a["column"] + " and " + b["column"] + " have different number of scores.");
+                return 0;
+            }
+
+            for (var i = 0; i < aData.length; i++) {
+                var sortingStep = steps[i];
+                var multiplier = sortingStep["reverse"] ? -1 : 1;
+
+                // convert to numbers
+                var scoreA = parseFloat(aData[i]);
+                var scoreB = parseFloat(bData[i]);
+
+                // handle non-numericals
+                // As per IEEE-754 spec, a nan checked for equality against itself will be unequal (in other words, nan != nan)
+                // ref: http://kineme.net/Discussion/DevelopingCompositions/CheckifnumberNaNjavascriptpatch
+                if (scoreA != scoreA || scoreB != scoreB) {
+                    if (scoreA != scoreA && scoreB != scoreB) {
+                        continue;
+                    } else if (scoreA != scoreA) {
+                        return -1 * multiplier;
+                    } else if (scoreB != scoreB) {
+                        return 1 * multiplier;
+                    }
+                }
+
+                if (scoreA < scoreB) {
+                    return -1 * multiplier;
+                }
+                if (scoreA > scoreB) {
+                    return 1 * multiplier;
+                } else {
+                    continue;
+                }
+            }
+            // Reach this if the score vectors are identical.
+            return 0;
+        }
+
+    };
+
+    // TODO multi-sort
+    /**
+     * Get a sorted list of row names from a list of cells.
+     */
+    this.multiSortRows = function(sortingSteps) {
+        var steps = sortingSteps.getSteps().reverse();
+        // columns is one column of cells from the data
+
+        var allRowNames = this.getRowNames();
+        var sortingData = new Array();
+
+        // create array of sorting objects
+        var dataHash = new Object();
+        for (var a = 0; a < allRowNames.length; a++) {
+            var rowName = allRowNames[a];
+            var data = null;
+
+            if ( rowName in dataHash) {
+            } else {
+                dataHash[rowName] = new Object();
+            }
+            data = dataHash[rowName];
+
+            for (var b = 0; b < steps.length; b++) {
+                var step = steps[b];
+                var columnName = step["name"];
+                var datatype = null;
+
+                var cellData = this.getCells(columnName, rowName, datatype);
+                if (cellData.length == 1) {
+                    data[columnName] = cellData[0].getValue();
+                } else {
+                    console.log(cellData.length + " cellData objects for", columnName, rowName, datatype);
+                    data[columnName] = null;
+                }
+            }
+        }
+
+        // convert hash to array
+        for (var row in dataHash) {
+            var data = new Array();
+            for (var b = 0; b < steps.length; b++) {
+                data.push(dataHash[row][steps[b]["name"]]);
+            }
+            sortingData.push({
+                "row" : row,
+                "data" : data
+            });
+        }
+
+        // sort objects
+        sortingData.sort(compareRows);
+
+        // return row names in sorted ordersortedNames = new Array();
+        var sortedNames = new Array();
+        for (var k = 0; k < sortingData.length; k++) {
+            sortedNames.push(sortingData[k]["row"]);
+        }
+
+        return sortedNames;
+
+        /**
+         * comparison function
+         */
+        function compareRows(a, b) {
+
+            var aData = a["data"];
+            var bData = b["data"];
+
+            if (aData.length != aData.length) {
+                console.log(a["row"] + " and " + b["row"] + " have different number of scores.");
                 return 0;
             }
 
