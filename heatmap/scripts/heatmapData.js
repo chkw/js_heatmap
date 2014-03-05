@@ -266,10 +266,10 @@ function heatmapData() {
         return mapper;
     };
 
-    this.getColumnNames = function() {
+    this.getAxisNames = function(axis) {
         var result = new Array();
         for (var i in this.data) {
-            var val = this.data[i].getColumn();
+            var val = (axis === "column") ? this.data[i].getColumn() : this.data[i].getRow();
             if (result.indexOf(val) >= 0) {
                 // don't add. already in list
             } else {
@@ -279,17 +279,12 @@ function heatmapData() {
         return result;
     };
 
+    this.getColumnNames = function() {
+        return this.getAxisNames("column");
+    };
+
     this.getRowNames = function() {
-        var result = new Array();
-        for (var i in this.data) {
-            var val = this.data[i].getRow();
-            if (result.indexOf(val) >= 0) {
-                // don't add. already in list
-            } else {
-                result.push(val);
-            }
-        }
-        return result;
+        return this.getAxisNames("row");
     };
 
     /**
@@ -400,171 +395,68 @@ function heatmapData() {
 
     // TODO multi-sort
     /**
-     * Get a sorted list of column names from a list of cells.
+     * Get a sorted list of row/column names from a list of cells.
      */
-    this.multiSortColumns = function(sortingSteps) {
-        var steps = sortingSteps.getSteps().reverse();
-        // columns is one row of cells from the data
+    this.multiSort = function(sortingSteps, axis) {
+        var reorderRows = true;
+        if ((axis != null) && (axis == "column")) {
+            reorderRows = false;
+        }
 
-        var allColNames = this.getColumnNames();
+        var steps = sortingSteps.getSteps().reverse();
+        // columns is one line of cells from the data
+
+        var reorderingAxisNames = (reorderRows) ? this.getRowNames() : this.getColumnNames();
+
         var sortingData = new Array();
 
         // create array of sorting objects
         var dataHash = new Object();
-        for (var a = 0; a < allColNames.length; a++) {
-            var colName = allColNames[a];
+        for (var a = 0; a < reorderingAxisNames.length; a++) {
+            var reorderingAxisName = reorderingAxisNames[a];
             var data = null;
 
-            if ( colName in dataHash) {
+            if ( reorderingAxisName in dataHash) {
             } else {
-                dataHash[colName] = new Object();
+                dataHash[reorderingAxisName] = new Object();
             }
-            data = dataHash[colName];
+            data = dataHash[reorderingAxisName];
 
             for (var b = 0; b < steps.length; b++) {
                 var step = steps[b];
-                var rowName = step["name"];
+                var staticAxisName = step["name"];
                 var datatype = null;
 
-                var cellData = this.getCells(colName, rowName, datatype);
+                var cellData = (reorderRows) ? this.getCells(staticAxisName, reorderingAxisName, datatype) : this.getCells(reorderingAxisName, staticAxisName, datatype);
                 if (cellData.length == 1) {
-                    data[rowName] = cellData[0].getValue();
+                    data[staticAxisName] = cellData[0].getValue();
                 } else {
-                    console.log(cellData.length + " cellData objects for", colName, rowName, datatype);
-                    data[rowName] = null;
+                    var s = (reorderRows) ? staticAxisName + " " + reorderingAxisName : reorderingAxisName + " " + staticAxisName;
+                    // console.log(cellData.length + " cellData objects for", s, datatype);
+                    data[staticAxisName] = null;
                 }
             }
         }
 
         // convert hash to array
-        for (var col in dataHash) {
+        for (var name in dataHash) {
             var data = new Array();
             for (var b = 0; b < steps.length; b++) {
-                data.push(dataHash[col][steps[b]["name"]]);
+                data.push(dataHash[name][steps[b]["name"]]);
             }
             sortingData.push({
-                "column" : col,
-                "data" : data
+                "name" : name,
+                "vector" : data
             });
         }
 
         // sort objects
-        sortingData.sort(compareColumns);
-
-        // return column names in sorted ordersortedNames = new Array();
-        var sortedNames = new Array();
-        for (var k = 0; k < sortingData.length; k++) {
-            sortedNames.push(sortingData[k]["column"]);
-        }
-
-        return sortedNames;
-
-        /**
-         * comparison function
-         */
-        function compareColumns(a, b) {
-
-            var aData = a["data"];
-            var bData = b["data"];
-
-            if (aData.length != aData.length) {
-                console.log(a["column"] + " and " + b["column"] + " have different number of scores.");
-                return 0;
-            }
-
-            for (var i = 0; i < aData.length; i++) {
-                var sortingStep = steps[i];
-                var multiplier = sortingStep["reverse"] ? -1 : 1;
-
-                // convert to numbers
-                var scoreA = parseFloat(aData[i]);
-                var scoreB = parseFloat(bData[i]);
-
-                // handle non-numericals
-                // As per IEEE-754 spec, a nan checked for equality against itself will be unequal (in other words, nan != nan)
-                // ref: http://kineme.net/Discussion/DevelopingCompositions/CheckifnumberNaNjavascriptpatch
-                if (scoreA != scoreA || scoreB != scoreB) {
-                    if (scoreA != scoreA && scoreB != scoreB) {
-                        continue;
-                    } else if (scoreA != scoreA) {
-                        return -1 * multiplier;
-                    } else if (scoreB != scoreB) {
-                        return 1 * multiplier;
-                    }
-                }
-
-                if (scoreA < scoreB) {
-                    return -1 * multiplier;
-                }
-                if (scoreA > scoreB) {
-                    return 1 * multiplier;
-                } else {
-                    continue;
-                }
-            }
-            // Reach this if the score vectors are identical.
-            return 0;
-        }
-
-    };
-
-    // TODO multi-sort
-    /**
-     * Get a sorted list of row names from a list of cells.
-     */
-    this.multiSortRows = function(sortingSteps) {
-        var steps = sortingSteps.getSteps().reverse();
-        // columns is one column of cells from the data
-
-        var allRowNames = this.getRowNames();
-        var sortingData = new Array();
-
-        // create array of sorting objects
-        var dataHash = new Object();
-        for (var a = 0; a < allRowNames.length; a++) {
-            var rowName = allRowNames[a];
-            var data = null;
-
-            if ( rowName in dataHash) {
-            } else {
-                dataHash[rowName] = new Object();
-            }
-            data = dataHash[rowName];
-
-            for (var b = 0; b < steps.length; b++) {
-                var step = steps[b];
-                var columnName = step["name"];
-                var datatype = null;
-
-                var cellData = this.getCells(columnName, rowName, datatype);
-                if (cellData.length == 1) {
-                    data[columnName] = cellData[0].getValue();
-                } else {
-                    console.log(cellData.length + " cellData objects for", columnName, rowName, datatype);
-                    data[columnName] = null;
-                }
-            }
-        }
-
-        // convert hash to array
-        for (var row in dataHash) {
-            var data = new Array();
-            for (var b = 0; b < steps.length; b++) {
-                data.push(dataHash[row][steps[b]["name"]]);
-            }
-            sortingData.push({
-                "row" : row,
-                "data" : data
-            });
-        }
-
-        // sort objects
-        sortingData.sort(compareRows);
+        sortingData.sort(compareVectors);
 
         // return row names in sorted ordersortedNames = new Array();
         var sortedNames = new Array();
         for (var k = 0; k < sortingData.length; k++) {
-            sortedNames.push(sortingData[k]["row"]);
+            sortedNames.push(sortingData[k]["name"]);
         }
 
         return sortedNames;
@@ -572,13 +464,13 @@ function heatmapData() {
         /**
          * comparison function
          */
-        function compareRows(a, b) {
+        function compareVectors(a, b) {
 
-            var aData = a["data"];
-            var bData = b["data"];
+            var aData = a["vector"];
+            var bData = b["vector"];
 
             if (aData.length != aData.length) {
-                console.log(a["row"] + " and " + b["row"] + " have different number of scores.");
+                console.log(a["name"] + " and " + b["name"] + " have different number of scores.");
                 return 0;
             }
 
@@ -621,57 +513,15 @@ function heatmapData() {
     /**
      * Get a sorted list of column names from a list of cells.
      */
-    this.sortColumns = function(rowName, datatype, cellList) {
-        var sortedNames = new Array();
+    this.multiSortColumns = function(sortingSteps) {
+        return this.multiSort(sortingSteps, "column");
+    };
 
-        // columns is one row of cells from the data
-        var columns = cellList;
-        if (columns == null) {
-            columns = this.getCells(null, rowName, null);
-        }
-        columns.sort(compareCells);
-
-        /**
-         * comparison function
-         */
-        function compareCells(a, b) {
-            // check datatype
-            var aType = a.getDatatype();
-            var bType = b.getDatatype();
-            if (datatype == null) {
-                // TODO no datatype specified
-            } else if ((aType != datatype) && (bType != datatype)) {
-                return 0;
-            } else if (aType != datatype) {
-                return -1;
-            } else if (bType != datatype) {
-                return 1;
-            }
-
-            // check value
-            var aVal = a.getValue();
-            var bVal = b.getValue();
-            if ((aVal == null) && (bVal == null)) {
-                return 0;
-            } else if (aVal == null) {
-                return -1;
-            } else if (bVal == null) {
-                return 1;
-            } else if (aVal > bVal) {
-                return 1;
-            } else if (aVal < bVal) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
-
-        for (var i in columns) {
-            var cellData = columns[i];
-            sortedNames.push(cellData.getColumn());
-        }
-
-        return sortedNames;
+    /**
+     * Get a sorted list of row names from a list of cells.
+     */
+    this.multiSortRows = function(sortingSteps) {
+        return this.multiSort(sortingSteps, "row");
     };
 }
 
