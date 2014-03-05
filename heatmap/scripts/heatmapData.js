@@ -123,6 +123,10 @@ function heatmapData() {
             this.setColorMapper(settings["datatype"], settings["colorMapper"]);
         }
 
+        if (settings["eventList"] != null) {
+            this.setRows(settings["eventList"]);
+        }
+
         return this;
     };
 
