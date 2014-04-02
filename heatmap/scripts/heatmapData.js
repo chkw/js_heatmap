@@ -288,6 +288,32 @@ function heatmapData() {
     };
 
     /**
+     * Find/fill missing cells
+     */
+    this.fillMissingCells = function() {
+        var colNames = this.getColumnNames();
+        var rowNames = this.getRowNames();
+
+        var blankCellData = [];
+        for (var c = 0; c < colNames.length; c++) {
+            var colName = colNames[c];
+            for (var r = 0; r < rowNames.length; r++) {
+                var rowName = rowNames[r];
+                var cells = this.getCells(colName, rowName, null);
+
+                if (cells.length <= 0) {
+                    blankCellData.push({
+                        'row' : rowName,
+                        'column' : colName,
+                        "value" : null
+                    });
+                }
+            }
+        }
+        this.addData(blankCellData, null);
+    };
+
+    /**
      * Remove unselected rows.
      */
     this.filterRows = function(selectedRowNames) {
