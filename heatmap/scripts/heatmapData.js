@@ -119,6 +119,8 @@ function heatmapData() {
             this.setColorMapper(settings["datatype"], quantileColorMapper);
         } else if (settings["colorMapper"] == "centered") {
             this.setColorMapper(settings["datatype"], this.centeredRgbaColorMapper(true));
+        } else if (settings["colorMapper"] == "categorical") {
+            this.setColorMapper(settings["datatype"], this.categoricalColorMapper());
         } else {
             this.setColorMapper(settings["datatype"], settings["colorMapper"]);
         }
@@ -190,6 +192,12 @@ function heatmapData() {
         return this.colorMappers[datatype];
     };
 
+    /**
+     * Get a color mapper for mapping categorical values to color.
+     */
+    this.categoricalColorMapper = function() {
+        return d3.scale.category10();
+    }
     /**
      * If palette not provided, a default palette is used.
      */
