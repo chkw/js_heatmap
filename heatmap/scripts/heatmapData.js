@@ -466,7 +466,7 @@ function heatmapData() {
                     data[staticAxisName] = cellData[0].getValue();
                 } else {
                     var s = (reorderRows) ? staticAxisName + " " + reorderingAxisName : reorderingAxisName + " " + staticAxisName;
-                    // console.log(cellData.length + " cellData objects for", s, datatype);
+                    console.log(cellData.length + " cellData objects for", s, "in datatype", datatype);
                     data[staticAxisName] = null;
                 }
             }
@@ -499,7 +499,6 @@ function heatmapData() {
          * comparison function
          */
         function compareVectors(a, b) {
-
             var aData = a["vector"];
             var bData = b["vector"];
 
@@ -512,30 +511,46 @@ function heatmapData() {
                 var sortingStep = steps[i];
                 var multiplier = sortingStep["reverse"] ? -1 : 1;
 
-                // convert to numbers
-                var scoreA = parseFloat(aData[i]);
-                var scoreB = parseFloat(bData[i]);
+                var valA = aData[i];
+                var valB = bData[i];
 
-                // handle non-numericals
-                // As per IEEE-754 spec, a nan checked for equality against itself will be unequal (in other words, nan != nan)
-                // ref: http://kineme.net/Discussion/DevelopingCompositions/CheckifnumberNaNjavascriptpatch
-                if (scoreA != scoreA || scoreB != scoreB) {
-                    if (scoreA != scoreA && scoreB != scoreB) {
+                // convert to numbers
+                var scoreA = parseFloat(valA);
+                var scoreB = parseFloat(valB);
+
+                if (isNumerical(scoreA) && (isNumerical(scoreB))) {
+                    if (scoreA < scoreB) {
+                        return -1 * multiplier;
+                    }
+                    if (scoreA > scoreB) {
+                        return 1 * multiplier;
+                    } else {
                         continue;
+                    }
+                } else {
+                    // handle non-numericals
+                    if (scoreA != scoreA && scoreB != scoreB) {
+                        // TODO both non-numerical, may be nulls
+
+                        // if (scoreA == null && scoreB == null) {
+                        // continue;
+                        // } else if (scoreA == null && scoreB != null) {
+                        // return -1 * multiplier;
+                        // } else if (scoreA != null && scoreB == null) {
+                        // return 1 * multiplier;
+                        // } else {
+                        // console.log("a", valA, "b", valB);
+                        // return valA.localeCompare(valB) * multiplier;
+                        // }
+
+                        console.log("scoreA", scoreA, "scoreB", scoreA, "valA", valA, "valB", valB);
+                        continue;
+
                     } else if (scoreA != scoreA) {
                         return -1 * multiplier;
                     } else if (scoreB != scoreB) {
                         return 1 * multiplier;
                     }
-                }
-
-                if (scoreA < scoreB) {
-                    return -1 * multiplier;
-                }
-                if (scoreA > scoreB) {
-                    return 1 * multiplier;
-                } else {
-                    continue;
                 }
             }
             // Reach this if the score vectors are identical.
@@ -570,4 +585,18 @@ function lengthOfLongestString(arrayOfStrings) {
 
 function endsWith(str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
+}
+
+function isNumerical(val) {
+    var result = true;
+    if (val == null || val === "") {
+        return false;
+    }
+
+    // As per IEEE-754 spec, a nan checked for equality against itself will be unequal (in other words, nan != nan)
+    // ref: http://kineme.net/Discussion/DevelopingCompositions/CheckifnumberNaNjavascriptpatch
+    if (isNaN(val)) {
+        return false;
+    }
+    return result;
 }
