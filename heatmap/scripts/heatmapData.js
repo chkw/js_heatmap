@@ -197,7 +197,8 @@ function heatmapData() {
      */
     this.categoricalColorMapper = function() {
         return d3.scale.category10();
-    }
+    };
+
     /**
      * If palette not provided, a default palette is used.
      */
@@ -572,31 +573,4 @@ function heatmapData() {
     this.multiSortRows = function(sortingSteps) {
         return this.multiSort(sortingSteps, "row");
     };
-}
-
-function lengthOfLongestString(arrayOfStrings) {
-    var lengths = new Array();
-    for (var i in arrayOfStrings) {
-        lengths.push(arrayOfStrings[i].length);
-    }
-    var maxLength = Math.max.apply(null, lengths);
-    return maxLength;
-}
-
-function endsWith(str, suffix) {
-    return str.indexOf(suffix, str.length - suffix.length) !== -1;
-}
-
-function isNumerical(val) {
-    var result = true;
-    if (val == null || val === "") {
-        return false;
-    }
-
-    // As per IEEE-754 spec, a nan checked for equality against itself will be unequal (in other words, nan != nan)
-    // ref: http://kineme.net/Discussion/DevelopingCompositions/CheckifnumberNaNjavascriptpatch
-    if (isNaN(val)) {
-        return false;
-    }
-    return result;
 }
